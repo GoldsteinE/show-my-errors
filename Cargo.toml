@@ -1,0 +1,16 @@
+[package]
+name = "show-my-errors"
+version = "0.1.0"
+authors = ["Maximilian Siling <mouse-art@ya.ru>"]
+edition = "2018"
+description = "Nice, colorful and simple error output"
+readme = "README.md"
+repository = "https://github.com/GoldsteinE/show-my-errors"
+license = "MIT OR Apache-2.0"
+keywords = ["errors", "pretty", "cli"]
+categories = ["command-line-interface"]
+
+[dependencies]
+thiserror = "1.0.15"
+termcolor = "1.1.0"
+atty = "0.2.14"
