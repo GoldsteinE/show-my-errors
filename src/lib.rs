@@ -114,12 +114,14 @@ impl<'a> AnnotationList<'a> {
                     .chars()
                     .enumerate()
                     .filter(|(_idx, c)| *c == '\n')
-                    .flat_map(|(idx, _c)| iter::once(idx).chain(iter::once(idx + 1))),
+                    .map(|(idx, _c)| idx + 1),
             )
             .chain(iter::once(string.len()))
             .collect();
         let lines = linebreaks
-            .chunks(2)
+            .windows(2)
+            // Last line when there is a newline at the and of string
+            .filter(|bounds| bounds[0] != bounds[1])
             .map(|bounds| AnnotatedLine {
                 start: bounds[0],
                 content: &string[bounds[0]..bounds[1]],
@@ -149,7 +151,9 @@ impl<'a> AnnotationList<'a> {
             Err(idx) if idx > 0 => idx - 1,
             _ => unreachable!("lines in AnnotationList not starting at 0"),
         };
+        dbg!(&self.lines[self.lines.len() - 1]);
         let line = &mut self.lines[line_idx];
+        dbg!(&line);
         if range.start >= line.start() + line.content.len() {
             Err(Error::AfterStringEnd(range.start, range.end))
         } else {
@@ -245,7 +249,10 @@ impl<'a> AnnotationList<'a> {
 
                 // Line content
                 stream.set_color(&stylesheet.content)?;
-                write!(stream, "{}\n", line.content)?;
+                write!(stream, "{}", line.content)?;
+                if !line.content.ends_with('\n') {
+                    stream.write(b"\n")?;
+                }
 
                 // Line numbers column
                 stream.set_color(&stylesheet.linenr)?;
@@ -345,22 +352,44 @@ mod tests {
     }
 
     #[test]
-    fn test_new_annotation_list() {
+    fn test_new_many_newlines() {
         let annotation_list = create_list();
         let mut lines = annotation_list.annotated_lines().iter();
-        assert_start_content(lines.next().unwrap(), 0, "");
-        assert_start_content(lines.next().unwrap(), 1, "string");
-        assert_start_content(lines.next().unwrap(), 8, "with");
-        assert_start_content(lines.next().unwrap(), 13, "many");
-        assert_start_content(lines.next().unwrap(), 18, "");
-        assert_start_content(lines.next().unwrap(), 19, "newlines");
-        assert_start_content(lines.next().unwrap(), 28, "");
-        assert_start_content(lines.next().unwrap(), 29, "");
+        assert_start_content(lines.next().unwrap(), 0, "\n");
+        assert_start_content(lines.next().unwrap(), 1, "string\n");
+        assert_start_content(lines.next().unwrap(), 8, "with\n");
+        assert_start_content(lines.next().unwrap(), 13, "many\n");
+        assert_start_content(lines.next().unwrap(), 18, "\n");
+        assert_start_content(lines.next().unwrap(), 19, "newlines\n");
+        assert_start_content(lines.next().unwrap(), 28, "\n");
         assert!(lines.next().is_none());
     }
 
     #[test]
-    fn test_add() -> Result<()> {
+    fn test_new_without_newlines() {
+        let annotation_list = AnnotationList::new("filename", "string without newlines");
+        let mut lines = annotation_list.annotated_lines().iter();
+        assert_start_content(lines.next().unwrap(), 0, "string without newlines");
+        assert!(lines.next().is_none());
+    }
+
+    #[test]
+    fn test_new_trailing_newline() {
+        let annotation_list = AnnotationList::new("filename", "string with trailing newline\n");
+        let mut lines = annotation_list.annotated_lines().iter();
+        assert_start_content(lines.next().unwrap(), 0, "string with trailing newline\n");
+    }
+
+    #[test]
+    fn test_new_leading_newline() {
+        let annotation_list = AnnotationList::new("filename", "\nstring with leading newline");
+        let mut lines = annotation_list.annotated_lines().iter();
+        assert_start_content(lines.next().unwrap(), 0, "\n");
+        assert_start_content(lines.next().unwrap(), 1, "string with leading newline");
+    }
+
+    #[test]
+    fn test_add_normal() -> Result<()> {
         let ann1 = Annotation::info(1..3, "test1", "ann1")?;
         let ann2 = Annotation::warning(13..17, "test2", "ann2")?;
         let ann3 = Annotation::error(19..20, "test3", None)?;
@@ -388,6 +417,15 @@ mod tests {
                 _ => assert_eq!(line.annotations(), &[]),
             }
         }
+        Ok(())
+    }
+
+    #[test]
+    fn test_add_at_the_end() -> Result<()> {
+        let mut list = AnnotationList::new("fname", "hello world");
+        list.error(10..10, None, None)?;
+        let mut list = AnnotationList::new("fname", "hello world\n");
+        list.error(11..11, None, None)?;
         Ok(())
     }
 
