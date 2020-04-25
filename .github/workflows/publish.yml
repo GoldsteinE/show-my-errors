@@ -1,4 +1,4 @@
-name: upload
+name: Publish crate
 on:
   create:
     tags:
