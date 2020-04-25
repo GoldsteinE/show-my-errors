@@ -16,8 +16,7 @@
 //! list
 //!     .warning(4..7, "punctuation problem", "you probably forgot a comma")?
 //!     .info(0..0, "consider adding some translations", None)?;
-//! assert_eq!(list.to_string()?, r#"
-//! warning: punctuation problem
+//! assert_eq!(list.to_string()?, r#"warning: punctuation problem
 //!   --> hello.txt:1:5
 //!    |
 //!  1 | Hello world!
@@ -254,14 +253,15 @@ impl<'a> AnnotationList<'a> {
                 stream.write(b"|")?;
 
                 // Annotation
-                stream.set_color(severity_color)?;
-                print_n(&mut stream, b" ", range.start - line.start + 1)?;
-                print_n(&mut stream, b"^", range.end - range.start)?;
-                if let Some(text) = &annotation.text {
-                    write!(stream, " {}\n", text)?;
-                } else {
-                    stream.write(b"\n")?;
+                if range.end - range.start != 0 {
+                    stream.set_color(severity_color)?;
+                    print_n(&mut stream, b" ", range.start - line.start + 1)?;
+                    print_n(&mut stream, b"^", range.end - range.start)?;
+                    if let Some(text) = &annotation.text {
+                        write!(stream, " {}", text)?;
+                    }
                 }
+                stream.write(b"\n")?;
                 stream.reset()?;
             }
         }
@@ -419,8 +419,7 @@ mod tests {
             .error(19..20, "test3", None)?
             .error(14..16, "test4", "ann4")?
             .error(14..16, None, "ann5")?;
-        let result = r#"
-info: test1
+        let result = r#"info: test1
   --> test.txt:2:1
    |
  2 | string
