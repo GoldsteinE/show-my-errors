@@ -1,8 +1,8 @@
 # show-my-errors
 
 ![License](https://img.shields.io/crates/l/show-my-errors?style=flat-square)
-![Version](https://img.shields.io/crates/v/show-my-errors?style=flat-square)
-![Build status](https://img.shields.io/github/workflow/status/GoldsteinE/show-my-errors/Build%20%26%20test?style=flat-square)
+[![Version](https://img.shields.io/crates/v/show-my-errors?style=flat-square)](https://crates.io/crates/show-my-errors)
+[![Build status](https://img.shields.io/github/workflow/status/GoldsteinE/show-my-errors/Build%20%26%20test?style=flat-square)](https://github.com/GoldsteinE/show-my-errors/actions)
 
 This is a library to display simple errors in colorful, rustc-like way.
 It can't show multi-line errors or draw arrows between parts of code, but its interface
