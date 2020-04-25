@@ -1,6 +1,6 @@
 [package]
 name = "show-my-errors"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Maximilian Siling <mouse-art@ya.ru>"]
 edition = "2018"
 description = "Nice, colorful and simple error output"
