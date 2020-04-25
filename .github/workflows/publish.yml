@@ -9,7 +9,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Log in to cargo
-      run: cargo login $CARGO_TOKEN
     - name: Publish package
-      run: cargo publish
+      run: 'cargo login $CARGO_TOKEN && cargo publish'
