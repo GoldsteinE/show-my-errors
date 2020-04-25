@@ -1,8 +1,9 @@
 name: Publish crate
+
 on:
   create:
-    tags:
-      - v*
+    tags: [ "v*" ]
+
 jobs:
   publish:
     runs-on: ubuntu-latest
