@@ -151,9 +151,7 @@ impl<'a> AnnotationList<'a> {
             Err(idx) if idx > 0 => idx - 1,
             _ => unreachable!("lines in AnnotationList not starting at 0"),
         };
-        dbg!(&self.lines[self.lines.len() - 1]);
         let line = &mut self.lines[line_idx];
-        dbg!(&line);
         if range.start >= line.start() + line.content.len() {
             Err(Error::AfterStringEnd(range.start, range.end))
         } else {
